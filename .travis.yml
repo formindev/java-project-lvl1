@@ -1,5 +1,5 @@
 language:
-	java
+ java
 
 script:
-	- mvn clean package
+ - mvn clean package
