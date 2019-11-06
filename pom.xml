@@ -10,6 +10,13 @@
     <artifactId>java-project-lvl1</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <properties>
 
         <!--Project settings-->
