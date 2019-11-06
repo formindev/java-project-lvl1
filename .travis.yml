@@ -1,12 +1,5 @@
 language:
 	java
 
-jdk:
-	openjdk11
-
 script:
-  - ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-  - ./mvnw clean package
-
-after_success:
-  - echo "Build was successful. $TRAVIS_TEST_RESULT"
+	- mvn clean package
