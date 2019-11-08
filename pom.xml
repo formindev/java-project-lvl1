@@ -92,7 +92,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>games.Slot</mainClass>
+                            <mainClass>games.Drunkard</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
