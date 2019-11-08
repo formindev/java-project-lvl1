@@ -2,8 +2,6 @@ package games;
 
 import org.apache.commons.math3.util.MathArrays;
 
-import java.util.Arrays;
-
 public class Drunkard {
 
   private static final int PARS_TOTAL_COUNT = Par.values().length;
@@ -41,7 +39,6 @@ public class Drunkard {
 
     MathArrays.shuffle(cards);
     copyArrays(cards,cards.length / 2);
-
   }
 
   private static Suit getSuit(final int cardNumber) {
