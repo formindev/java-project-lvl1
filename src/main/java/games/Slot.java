@@ -28,7 +28,7 @@ public class Slot {
         bank = bank - bet;
         System.out.format("Проигрыш: %d$, ", bet);
       }
-      System.out.format("ваш капитал теперь составляет: %d $%n", bank);
+      System.out.format("ваш капитал теперь составляет: %d$%n", bank);
     }
     System.out.println("Игра окончена!");
   }
