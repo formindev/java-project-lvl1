@@ -56,7 +56,7 @@ public class Drunkard {
       final int firstPlayerPar =  firstPlayerCard % PARS_TOTAL_COUNT;
       final int secondPlayerPar =  secondPlayerCard % PARS_TOTAL_COUNT;
 
-      if (firstPlayerPar > secondPlayerPar || (firstPlayerPar == 0 && secondPlayerPar == 8)) {
+      if (firstPlayerPar > secondPlayerPar || firstPlayerPar == 0 && secondPlayerPar == 8) {
         addCardsToPlayer(FIRST_PLAYER, firstPlayerCard, secondPlayerCard);
         System.out.format("Выиграл %d игрок! %n", FIRST_PLAYER + 1);
       } else if (firstPlayerPar == secondPlayerPar) {
