@@ -3,43 +3,16 @@ package games;
 import org.apache.commons.math3.util.MathArrays;
 
 public class Drunkard {
-
-  private static final int PARS_TOTAL_COUNT = Par.values().length;
-  private static final int CARDS_TOTAL_COUNT = PARS_TOTAL_COUNT * Suit.values().length;
   private static final int FIRST_PLAYER = 0;
   private static final int SECOND_PLAYER = 1;
 
-  private static int[][] playersCards = new int[2][CARDS_TOTAL_COUNT + 1];
+  private static int[][] playersCards = new int[2][CardUtils.CARDS_TOTAL_COUNT + 1];
   private static int[] playerCardTails = new int[2];
   private static int[] playerCardHeads = new int[2];
 
-  private enum Suit {
-    SPADES,
-    HEARTS,
-    CLUBS,
-    DIAMONDS
-  }
-
-  private enum Par {
-    SIX,
-    SEVEN,
-    EIGHT,
-    NINE,
-    TEN,
-    JACK,
-    QUEEN,
-    KING,
-    ACE
-  }
-
   public static void main(final String... args) {
-    int[] cards = new int[CARDS_TOTAL_COUNT];
+    int[] cards = CardUtils.getShaffledCards();
 
-    for (int i = 0; i < cards.length; i++) {
-      cards[i] = i;
-    }
-
-    MathArrays.shuffle(cards);
     initArrays(cards,cards.length / 2);
 
     int iteration = 0;
@@ -51,10 +24,10 @@ public class Drunkard {
       final int secondPlayerCard = getPlayerCard(SECOND_PLAYER, playerCardTails[SECOND_PLAYER]);
 
       System.out.format("Итерация №%d Игрок №1 карта: %s; игрок №2 карта: %s. %n",
-          iteration, getString(firstPlayerCard), getString(secondPlayerCard));
+          iteration, CardUtils.getString(firstPlayerCard), CardUtils.getString(secondPlayerCard));
 
-      final int firstPlayerPar =  firstPlayerCard % PARS_TOTAL_COUNT;
-      final int secondPlayerPar =  secondPlayerCard % PARS_TOTAL_COUNT;
+      final int firstPlayerPar =  firstPlayerCard % CardUtils.PARS_TOTAL_COUNT;
+      final int secondPlayerPar =  secondPlayerCard % CardUtils.PARS_TOTAL_COUNT;
 
       if (firstPlayerPar > secondPlayerPar || firstPlayerPar == 0 && secondPlayerPar == 8) {
         addCardsToPlayer(FIRST_PLAYER, firstPlayerCard, secondPlayerCard);
@@ -89,7 +62,7 @@ public class Drunkard {
     } else {
       if (!playerCardsIsEmpty(FIRST_PLAYER)) {
         firstPlayerCountCards = playerCardHeads[FIRST_PLAYER]
-            + CARDS_TOTAL_COUNT + 1 - playerCardTails[FIRST_PLAYER];
+            + CardUtils.CARDS_TOTAL_COUNT + 1 - playerCardTails[FIRST_PLAYER];
       } else {
         firstPlayerCountCards = 0;
       }
@@ -100,7 +73,7 @@ public class Drunkard {
     } else {
       if (!playerCardsIsEmpty(SECOND_PLAYER)) {
         secondPlayerCountCards = playerCardHeads[SECOND_PLAYER]
-            + CARDS_TOTAL_COUNT + 1 - playerCardTails[SECOND_PLAYER];
+            + CardUtils.CARDS_TOTAL_COUNT + 1 - playerCardTails[SECOND_PLAYER];
       } else {
         secondPlayerCountCards = 0;
       }
@@ -142,20 +115,8 @@ public class Drunkard {
     }
   }
 
-  private static String getString(final int cardNumber) {
-    return getPar(cardNumber) + " " + getSuit(cardNumber);
-  }
-
-  private static Suit getSuit(final int cardNumber) {
-    return Suit.values()[cardNumber / PARS_TOTAL_COUNT];
-  }
-
-  private static Par getPar(final int cardNumber) {
-    return Par.values()[cardNumber % PARS_TOTAL_COUNT];
-  }
-
   private static void initArrays(final int[] cards, final int middleArray) {
-    for (int i = 0; i < CARDS_TOTAL_COUNT; i++) {
+    for (int i = 0; i < CardUtils.CARDS_TOTAL_COUNT; i++) {
       if (i < middleArray) {
         playersCards[FIRST_PLAYER][i] = cards[i];
       } else {
@@ -170,7 +131,7 @@ public class Drunkard {
   }
 
   private static int incrementIndex(int i) {
-    return (i + 1) % (CARDS_TOTAL_COUNT + 1);
+    return (i + 1) % (CardUtils.CARDS_TOTAL_COUNT + 1);
   }
 
   private static boolean playerCardsIsEmpty(final int playerIndex) {
