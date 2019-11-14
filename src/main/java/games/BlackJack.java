@@ -1,7 +1,6 @@
 package games;
 
 import java.io.IOException;
-import java.lang.management.PlatformLoggingMXBean;
 
 public class BlackJack {
   private static final int PLAYER = 0;
