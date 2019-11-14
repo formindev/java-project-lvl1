@@ -18,7 +18,7 @@ public class Choice {
     }
   }
 
-  private static char getCharacterFromUser() throws IOException {
+  static char getCharacterFromUser() throws IOException {
     byte[] input = new byte[1 + getSeparatorLength()];
     if (System.in.read(input) != input.length)
       throw new RuntimeException("Пользователь ввёл недостаточное кол-во символов");

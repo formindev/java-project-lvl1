@@ -25,7 +25,7 @@ class CardUtils {
     ACE
   }
 
-  static int[] getShaffledCards() {
+  static int[] getShuffledCards() {
     int[] cards = new int[CARDS_TOTAL_COUNT];
 
     for (int i = 0; i < cards.length; i++) {

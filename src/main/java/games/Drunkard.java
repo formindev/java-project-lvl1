@@ -1,7 +1,5 @@
 package games;
 
-import org.apache.commons.math3.util.MathArrays;
-
 public class Drunkard {
   private static final int FIRST_PLAYER = 0;
   private static final int SECOND_PLAYER = 1;
@@ -11,7 +9,7 @@ public class Drunkard {
   private static int[] playerCardHeads = new int[2];
 
   public static void main(final String... args) {
-    int[] cards = CardUtils.getShaffledCards();
+    int[] cards = CardUtils.getShuffledCards();
 
     initArrays(cards,cards.length / 2);
 
