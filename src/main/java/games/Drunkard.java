@@ -1,6 +1,11 @@
 package games;
 
+import org.slf4j.Logger;
+
 public class Drunkard {
+  private static final Logger log = org.slf4j.LoggerFactory.getLogger(Drunkard.class);
+
+  private static final int NO_PLAYER = -1;
   private static final int FIRST_PLAYER = 0;
   private static final int SECOND_PLAYER = 1;
 
@@ -9,112 +14,108 @@ public class Drunkard {
   private static int[] playerCardHeads = new int[2];
 
   public static void main(final String... args) {
-    int[] cards = CardUtils.getShuffledCards();
-
-    initArrays(cards,cards.length / 2);
-
     int iteration = 0;
 
+    dealCards();
+
     while (!playerCardsIsEmpty(FIRST_PLAYER) && !playerCardsIsEmpty(SECOND_PLAYER)) {
-      iteration += 1;
+      getPlayersCardsString(++iteration);
 
-      final int firstPlayerCard = getPlayerCard(FIRST_PLAYER, playerCardTails[FIRST_PLAYER]);
-      final int secondPlayerCard = getPlayerCard(SECOND_PLAYER, playerCardTails[SECOND_PLAYER]);
+      final int firstPlayerParIndex  = getParIndex(FIRST_PLAYER);
+      final int secondPlayerParIndex =  getParIndex(SECOND_PLAYER);
 
-      System.out.format("Итерация №%d Игрок №1 карта: %s; игрок №2 карта: %s. %n",
-          iteration, CardUtils.getString(firstPlayerCard), CardUtils.getString(secondPlayerCard));
-
-      final int firstPlayerPar =  firstPlayerCard % CardUtils.PARS_TOTAL_COUNT;
-      final int secondPlayerPar =  secondPlayerCard % CardUtils.PARS_TOTAL_COUNT;
-
-      if (firstPlayerPar > secondPlayerPar || firstPlayerPar == 0 && secondPlayerPar == 8) {
-        addCardsToPlayer(FIRST_PLAYER, firstPlayerCard, secondPlayerCard);
-        System.out.format("Выиграл %d игрок! %n", FIRST_PLAYER + 1);
-      } else if (firstPlayerPar == secondPlayerPar) {
-        addCardsToPlayer(-1, firstPlayerCard, secondPlayerCard);
-        System.out.println("Спор - каждый остаётся при своих!");
+      if (firstPlayerParIndex  > secondPlayerParIndex
+          || firstPlayerParIndex  == 0 && secondPlayerParIndex  == 8) {
+        addCardsToPlayer(FIRST_PLAYER);
+      } else if (firstPlayerParIndex  == secondPlayerParIndex) {
+        addCardsToPlayer(NO_PLAYER);
       } else {
-        addCardsToPlayer(SECOND_PLAYER, firstPlayerCard, secondPlayerCard);
-        System.out.format("Выиграл %d игрок! %n", SECOND_PLAYER + 1);
+        addCardsToPlayer(SECOND_PLAYER);
       }
 
       playerCardTails[FIRST_PLAYER] = incrementIndex(playerCardTails[FIRST_PLAYER]);
       playerCardTails[SECOND_PLAYER] = incrementIndex(playerCardTails[SECOND_PLAYER]);
 
-      getStringCountCards();
+      getCountsCardsString();
 
-      final int winner = getWinner();
-
-      if (winner != -1) {
-        System.out.format("Выиграл %d игрок! Количество произведённых итераций: %d.",
-            winner + 1, iteration);
-      }
+      getWinner(iteration);
     }
   }
 
-  private static void getStringCountCards() {
-    int firstPlayerCountCards;
-    int secondPlayerCountCards;
-    if (playerCardHeads[FIRST_PLAYER] > playerCardTails[FIRST_PLAYER]) {
-      firstPlayerCountCards = playerCardHeads[FIRST_PLAYER] - playerCardTails[FIRST_PLAYER];
-    } else {
-      if (!playerCardsIsEmpty(FIRST_PLAYER)) {
-        firstPlayerCountCards = playerCardHeads[FIRST_PLAYER]
-            + CardUtils.CARDS_TOTAL_COUNT + 1 - playerCardTails[FIRST_PLAYER];
-      } else {
-        firstPlayerCountCards = 0;
-      }
-    }
+  private static int getParIndex(final int playerIndex) {
+    final int playerCard = getPlayerCard(playerIndex);
+    return CardUtils.getPar(playerCard).ordinal();
+  }
 
-    if (playerCardHeads[SECOND_PLAYER] > playerCardTails[SECOND_PLAYER]) {
-      secondPlayerCountCards = playerCardHeads[SECOND_PLAYER] - playerCardTails[SECOND_PLAYER];
-    } else {
-      if (!playerCardsIsEmpty(SECOND_PLAYER)) {
-        secondPlayerCountCards = playerCardHeads[SECOND_PLAYER]
-            + CardUtils.CARDS_TOTAL_COUNT + 1 - playerCardTails[SECOND_PLAYER];
-      } else {
-        secondPlayerCountCards = 0;
-      }
-    }
+  private static void getPlayersCardsString(final int iteration) {
+    final int firstPlayerCard = getPlayerCard(FIRST_PLAYER);
+    final int secondPlayerCard = getPlayerCard(SECOND_PLAYER);
 
-    System.out.format("У игрока №1 %d карт, у игрока №2 %d карт%n", firstPlayerCountCards,
+    log.info("Итерация №{} Игрок №1 карта: {}; игрок №2 карта: {}.",
+        iteration, CardUtils.getString(firstPlayerCard), CardUtils.getString(secondPlayerCard));
+  }
+
+  private static void getCountsCardsString() {
+    final int firstPlayerCountCards = getCountCards(FIRST_PLAYER);
+    final int secondPlayerCountCards = getCountCards(SECOND_PLAYER);
+
+    log.info("У игрока №1 {} карт, у игрока №2 {} карт", firstPlayerCountCards,
         secondPlayerCountCards);
   }
 
+  private static int getCountCards(final int playerIndex) {
+    final int result;
+
+    if (playerCardHeads[playerIndex] > playerCardTails[playerIndex]) {
+      result = playerCardHeads[playerIndex] - playerCardTails[playerIndex];
+    } else {
+      if (!playerCardsIsEmpty(playerIndex)) {
+        result = playerCardHeads[playerIndex]
+            + CardUtils.CARDS_TOTAL_COUNT + 1 - playerCardTails[playerIndex];
+      } else {
+        result = 0;
+      }
+    }
+    return result;
+  }
+
   //Check players cards
-  private static int getWinner() {
+  private static void getWinner(final int iteration) {
     if (playerCardsIsEmpty(FIRST_PLAYER)) {
-      return SECOND_PLAYER;
+      log.info("Выиграл второй игрок! Количество произведённых итераций: {}.", iteration);
     }
 
     if (playerCardsIsEmpty(SECOND_PLAYER)) {
-      return FIRST_PLAYER;
+      log.info("Выиграл первый игрок! Количество произведённых итераций: {}.", iteration);
     }
-
-    return -1;
   }
 
-  private static int getPlayerCard(final int playerIndex, final int cardIndex) {
+  private static int getPlayerCard(final int playerIndex) {
+    final int cardIndex = playerCardTails[playerIndex];
     return playersCards[playerIndex][cardIndex];
   }
 
-  private static void addCardsToPlayer(final int playerIndex, final int firstPlayerCard,
-                                       final int secondPlayerCard) {
-    if (playerIndex != -1) {
-      playerCardHeads[playerIndex] = incrementIndex(playerCardHeads[playerIndex]);
-      playersCards[playerIndex][playerCardHeads[playerIndex]] = firstPlayerCard;
-      playerCardHeads[playerIndex] = incrementIndex(playerCardHeads[playerIndex]);
-      playersCards[playerIndex][playerCardHeads[playerIndex]] = secondPlayerCard;
+  private static void addCardsToPlayer(final int playerIndex) {
+    if (playerIndex != NO_PLAYER) {
+      for (int i = FIRST_PLAYER; i <= SECOND_PLAYER; i++) {
+        playerCardHeads[playerIndex] = incrementIndex(playerCardHeads[playerIndex]);
+        playersCards[playerIndex][playerCardHeads[playerIndex]] = getPlayerCard(i);
+      }
+      log.info("Выиграл {} игрок!", playerIndex + 1);
     } else {
-      playerCardHeads[FIRST_PLAYER] = incrementIndex(playerCardHeads[FIRST_PLAYER]);
-      playersCards[FIRST_PLAYER][playerCardHeads[FIRST_PLAYER]] = firstPlayerCard;
-      playerCardHeads[SECOND_PLAYER] = incrementIndex(playerCardHeads[SECOND_PLAYER]);
-      playersCards[SECOND_PLAYER][playerCardHeads[SECOND_PLAYER]] = secondPlayerCard;
+      for (int i = FIRST_PLAYER; i <= SECOND_PLAYER; i++) {
+        playerCardHeads[i] = incrementIndex(playerCardHeads[i]);
+        playersCards[i][playerCardHeads[i]] = getPlayerCard(i);
+      }
+      log.info("Спор - каждый остаётся при своих!");
     }
   }
 
-  private static void initArrays(final int[] cards, final int middleArray) {
-    for (int i = 0; i < CardUtils.CARDS_TOTAL_COUNT; i++) {
+  private static void dealCards() {
+    final int[] cards = CardUtils.getShuffledCards();
+    final int middleArray = cards.length / 2;
+
+    for (int i = 0; i < cards.length; i++) {
       if (i < middleArray) {
         playersCards[FIRST_PLAYER][i] = cards[i];
       } else {
@@ -128,7 +129,7 @@ public class Drunkard {
     playerCardTails[SECOND_PLAYER] = 0;
   }
 
-  private static int incrementIndex(int i) {
+  private static int incrementIndex(final int i) {
     return (i + 1) % (CardUtils.CARDS_TOTAL_COUNT + 1);
   }
 

@@ -1,12 +1,15 @@
 package games;
 
+import org.slf4j.Logger;
+
 import java.io.IOException;
 
 public class Choice {
+  private static final Logger log = org.slf4j.LoggerFactory.getLogger(Choice.class);
   private static final String LINE_SEPARATOR = System.lineSeparator();
 
   public static void main(final String... args) throws IOException {
-    System.out.println("Выберите игру:\n1 - \"однорукий бандит\", 2 - \"пьяница\", 3 - \"очко\"");
+    log.info("Выберите игру:\n1 - \"однорукий бандит\", 2 - \"пьяница\", 3 - \"очко\"");
     switch (getCharacterFromUser()) {
       case '1': Slot.main();
               break;
@@ -14,14 +17,15 @@ public class Choice {
               break;
       case '3': BlackJack.main();
               break;
-      default: System.out.println("Нет игры с таким номером!");
+      default: log.info("Нет игры с таким номером!");
     }
   }
 
   static char getCharacterFromUser() throws IOException {
     byte[] input = new byte[1 + getSeparatorLength()];
-    if (System.in.read(input) != input.length)
+    if (System.in.read(input) != input.length) {
       throw new RuntimeException("Пользователь ввёл недостаточное кол-во символов");
+    }
     return (char) input[0];
   }
 

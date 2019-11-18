@@ -1,8 +1,12 @@
 package games;
 
+import org.slf4j.Logger;
+
 import java.io.IOException;
 
 public class BlackJack {
+  private static final Logger log = org.slf4j.LoggerFactory.getLogger(BlackJack.class);
+
   private static final int PLAYER = 0;
   private static final int CPU = 1;
   private static final int BET = 10;
@@ -14,6 +18,7 @@ public class BlackJack {
   private static int[] playersCursors;
 
   private static final int MAX_VALUE = 21;
+  private static final int MAX_CPU_VALUE = 17;
   private static final int MAX_CARDS_COUNT = 8;
 
   private static int[] playersMoney = {100, 100};
@@ -22,42 +27,62 @@ public class BlackJack {
     while (playersMoney[PLAYER] > 0 && playersMoney[CPU] > 0) {
       initRound();
 
-      System.out.format("Вам выпала карта %s%n", CardUtils.getString(addCardToPlayer(PLAYER)));
-      System.out.format("Вам выпала карта %s%n", CardUtils.getString(addCardToPlayer(PLAYER)));
-      while (sum(PLAYER) < 20) {
-        if (confirm("Берем еще?")) {
-          System.out.format("Вам выпала карта %s%n", CardUtils.getString(addCardToPlayer(PLAYER)));
-        } else {
-          break;
-        }
-      }
+      getPlayerCards();
 
-      System.out.format("Компьютеру выпала карта %s%n", CardUtils.getString(addCardToPlayer(CPU)));
-      System.out.format("Компьютеру выпала карта %s%n", CardUtils.getString(addCardToPlayer(CPU)));
-      while (sum(CPU) < 17) {
-          System.out.format("Компьютеру выпала карта %s%n", CardUtils.getString(addCardToPlayer(CPU)));
-      }
-      final int sumPlayer = getFinalSum(PLAYER);
-      final int sumCpu = getFinalSum(CPU);
-      System.out.format("Сумма ваших очков - %d, компьютера - %d%n", sumPlayer, sumCpu);
+      getCpuCards();
 
-      if (sumCpu > sumPlayer) {
-        playersMoney[PLAYER] -= BET;
-        playersMoney[CPU] += BET;
-        System.out.format("Вы проиграли раунд! Теряете %d$%n", BET);
-      } else
-        if (sumCpu < sumPlayer) {
-          playersMoney[PLAYER] += BET;
-          playersMoney[CPU] -= BET;
-          System.out.format("Вы выиграли раунд! Получаете %d$%n", BET);
-        } else
-           System.out.println("Ничья - каждый остается при своих!");
+      getWinner();
     }
 
     if (playersMoney[PLAYER] > 0)
-      System.out.println("Вы выиграли! Поздравляем!");
+      log.info("Вы выиграли! Поздравляем!");
     else
-      System.out.println("Вы проиграли. Соболезнуем...");
+      log.info("Вы проиграли. Соболезнуем...");
+  }
+
+  private static void getWinner() {
+    final int sumPlayer = getFinalSum(PLAYER);
+    final int sumCpu = getFinalSum(CPU);
+    log.info("Сумма ваших очков - {}, компьютера - {}", sumPlayer, sumCpu);
+
+    if (sumCpu > sumPlayer) {
+      getPaid(CPU);
+    } else
+    if (sumCpu < sumPlayer) {
+      getPaid(PLAYER);
+    } else {
+      log.info("Ничья - каждый остается при своих!");
+    }
+  }
+
+  private static void getCpuCards() {
+    while (sum(CPU) < MAX_CPU_VALUE) {
+      log.info("Компьютеру выпала карта {}", CardUtils.getString(addCardToPlayer(CPU)));
+    }
+  }
+
+  private static void getPlayerCards() throws IOException {
+    int iteration = 1;
+    while (sum(PLAYER) < MAX_VALUE - 1) {
+      if (confirm(iteration)) {
+        log.info("Вам выпала карта {}", CardUtils.getString(addCardToPlayer(PLAYER)));
+        iteration++;
+      } else {
+        break;
+      }
+    }
+  }
+
+  private static void getPaid(final int playerIndex) {
+    if (playerIndex == CPU) {
+      playersMoney[PLAYER] -= BET;
+      playersMoney[CPU] += BET;
+      log.info("Вы проиграли раунд! Теряете {}$", BET);
+    } else {
+      playersMoney[PLAYER] += BET;
+      playersMoney[CPU] -= BET;
+      log.info("Вы выиграли раунд! Получаете {}$", BET);
+    }
   }
 
   private static int sum(final int player) {
@@ -77,26 +102,27 @@ public class BlackJack {
     return result;
   }
 
-  private static boolean confirm(String message) throws IOException {
-    System.out.println(message + " \"Y\" - Да, {любой другой символ} - "
-                       + "нет (Чтобы выйти из игры, нажмите Ctrl + C)");
-    switch (Choice.getCharacterFromUser()) {
-      case 'Y':
-      case 'y': return true;
-      default: return false;
+  private static boolean confirm(final int iteration) throws IOException {
+    if (iteration > 2) {
+      log.info("Берем еще? \"Y\" - Да, \"N\" - нет (Чтобы выйти из игры, нажмите Ctrl + C)");
+      switch (Choice.getCharacterFromUser()) {
+        case 'Y':
+        case 'y': return true;
+        default: return false;
+      }
     }
+    return true;
   }
 
-  private static int addCardToPlayer(final int player) {
-    playersCards[player][playersCursors[player]] = cards[cursor];
-    playersCursors[player] += 1;
-    cursor += 1;
+  private static int addCardToPlayer(final int playerIndex) {
+    playersCards[playerIndex][playersCursors[playerIndex]] = cards[cursor];
+    playersCursors[playerIndex]++;
+    cursor++;
     return cards[cursor - 1];
   }
 
   private static void initRound() {
-    System.out.format("У Вас %d$, у компьютера - %d$. Начинаем новый раунд!%n",
-                      playersMoney[PLAYER], playersMoney[CPU]);
+    log.info("У Вас {}$, у компьютера - {}$. Начинаем новый раунд!", playersMoney[PLAYER], playersMoney[CPU]);
     cards = CardUtils.getShuffledCards();
     playersCards = new int[2][MAX_CARDS_COUNT];
     playersCursors = new int[]{0, 0};
