@@ -21,24 +21,33 @@ public class Drunkard {
     while (!playerCardsIsEmpty(FIRST_PLAYER) && !playerCardsIsEmpty(SECOND_PLAYER)) {
       getPlayersCardsString(++iteration);
 
-      final int firstPlayerParIndex  = getParIndex(FIRST_PLAYER);
-      final int secondPlayerParIndex =  getParIndex(SECOND_PLAYER);
+      playRound();
 
-      if (firstPlayerParIndex  > secondPlayerParIndex
-          || firstPlayerParIndex  == 0 && secondPlayerParIndex  == 8) {
-        addCardsToPlayer(FIRST_PLAYER);
-      } else if (firstPlayerParIndex  == secondPlayerParIndex) {
-        addCardsToPlayer(NO_PLAYER);
-      } else {
-        addCardsToPlayer(SECOND_PLAYER);
-      }
-
-      playerCardTails[FIRST_PLAYER] = incrementIndex(playerCardTails[FIRST_PLAYER]);
-      playerCardTails[SECOND_PLAYER] = incrementIndex(playerCardTails[SECOND_PLAYER]);
+      getNextCards();
 
       getCountsCardsString();
 
       getWinner(iteration);
+    }
+  }
+
+  private static void playRound() {
+    final int firstPlayerParIndex  = getParIndex(FIRST_PLAYER);
+    final int secondPlayerParIndex =  getParIndex(SECOND_PLAYER);
+
+    if (firstPlayerParIndex  > secondPlayerParIndex
+        || firstPlayerParIndex  == 0 && secondPlayerParIndex  == 8) {
+      addCardsToPlayer(FIRST_PLAYER);
+    } else if (firstPlayerParIndex  == secondPlayerParIndex) {
+      addCardsToPlayer(NO_PLAYER);
+    } else {
+      addCardsToPlayer(SECOND_PLAYER);
+    }
+  }
+
+  private static void getNextCards() {
+    for (int i = FIRST_PLAYER; i <= SECOND_PLAYER; i++) {
+      playerCardTails[i] = incrementIndex(playerCardTails[i]);
     }
   }
 
@@ -122,11 +131,14 @@ public class Drunkard {
         playersCards[SECOND_PLAYER][i - middleArray] = cards[i];
       }
     }
+    setPlayersCardsPoints(middleArray);
+  }
 
-    playerCardHeads[FIRST_PLAYER] = middleArray;
-    playerCardHeads[SECOND_PLAYER] = middleArray;
-    playerCardTails[FIRST_PLAYER] = 0;
-    playerCardTails[SECOND_PLAYER] = 0;
+  private static void setPlayersCardsPoints(final int middleArray) {
+    for (int i = FIRST_PLAYER; i <= SECOND_PLAYER; i++) {
+      playerCardHeads[i] = middleArray;
+      playerCardTails[i] = 0;
+    }
   }
 
   private static int incrementIndex(final int i) {
